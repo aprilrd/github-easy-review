@@ -1,7 +1,10 @@
 key = window.location.pathname
+lastCommit = $('code:last').text()
 
 chrome.storage.sync.get(key, (item) ->
-  reviewStatuses = item[key] or {}
+  reviewStatuses = item[key] or { lastCommit }
+  if reviewStatuses.lastCommit isnt lastCommit
+    reviewStatuses = { lastCommit }
 
   $('div.meta').on('click', ->
     hiddenComment = $(this).siblings('div.data').toggle()
