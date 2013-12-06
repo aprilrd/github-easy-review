@@ -1,12 +1,16 @@
-reviewStatuses = JSON.parse(localStorage.githubPRReview or '{}')
+key = window.location.pathname
 
-$('div.meta').on('click', ->
-  hiddenComment = $(this).siblings('div.data').toggle()
-  reviewStatuses[window.location.pathname + '|' + $(this).attr('data-path')] = hiddenComment.is(':visible')
-  localStorage.githubPRReview = JSON.stringify(reviewStatuses)
+chrome.storage.sync.get(key, (item) ->
+  reviewStatuses = item[key] or {}
+
+  $('div.meta').on('click', ->
+    hiddenComment = $(this).siblings('div.data').toggle()
+    reviewStatuses[$(this).attr('data-path')] = hiddenComment.is(':visible')
+    toSave = {}
+    toSave[key] = reviewStatuses
+    chrome.storage.sync.set(toSave)
+  )
+
+  for file, visible of reviewStatuses
+    $('div.meta:contains(' + file + ')').siblings('div.data').hide() if not visible
 )
-
-for reviewStatus, visible of reviewStatuses
-  [ path, file ] = reviewStatus.split('|')
-  continue if path isnt location.pathname
-  $('div.meta:contains(' + file + ')').siblings('div.data').hide() if not visible
